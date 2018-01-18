@@ -11,13 +11,21 @@
   "engines": {
     "node":"8.9.4"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juwon24luv123/todo-application.git"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/juwon24luv123/todo-application/issues"
+  },
+  "homepage": "https://github.com/juwon24luv123/todo-application#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "mongodb": "^3.0.1",
-    "mongoose": "^4.13.9"
+    "mongoose": "^5.0.0"
   },
   "devDependencies": {
     "expect": "^22.1.0",
