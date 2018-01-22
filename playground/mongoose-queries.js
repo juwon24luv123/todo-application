@@ -3,7 +3,7 @@ const {mongoose} = require('./../server/db/mongoose');
 const {Todo} = require('./../server/models/todo');
 const {User} = require('./../server/models/user')
 
-var id = '4a577ad2ec368c23049f1c8c'
+// var id = '4a577ad2ec368c23049f1c8c'
 // var id = '5a5ca9236761976408c9c87a11';
 
 // ObjectID.isValid
@@ -33,23 +33,23 @@ var id = '4a577ad2ec368c23049f1c8c'
 //     console.log(e)
 // });
 
-User.find({
-    _id: id
-}).then((users) => {
-    console.log('Users', users)
-});
+// User.find({
+//     _id: id
+// }).then((users) => {
+//     console.log('Users', users)
+// });
 
-User.findOne({
-    _id: id
-}).then((user) => {
-    console.log('User', user)
-});
+// User.findOne({
+//     _id: id
+// }).then((user) => {
+//     console.log('User', user)
+// });
 
-User.findById(id).then((user) => {
-    if(!user) {
-        return console.log('Unable to find user')
-    }
-    console.log(JSON.stringify(user, undefined, 2));
-}).catch((e) => {
-    console.log(e)
-});
+// User.findById(id).then((user) => {
+//     if(!user) {
+//         return console.log('Unable to find user')
+//     }
+//     console.log(JSON.stringify(user, undefined, 2));
+// }).catch((e) => {
+//     console.log(e)
+// });
