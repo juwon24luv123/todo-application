@@ -6,10 +6,10 @@ var authenticate = (req, res, next) => {
     User.findByToken(token).then((user) => {
         if(!user) {
             // res.status(401).send();
-            // NEW TECNI TO USE INSTEAD OF NORMAL RES.STATUS(401).SEND();
+            // NEW TEChni TO USE INSTEAD OF NORMAL RES.STATUS(401).SEND();
             return Promise.reject();
         }
-        
+
         req.user = user;
         req.token = token;
         next();

@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "expect": "^22.1.0",
+    "jest-tobetype": "^1.1.0",
     "mocha": "^4.1.0",
     "nodemon": "^1.14.11",
     "supertest": "^3.0.0"

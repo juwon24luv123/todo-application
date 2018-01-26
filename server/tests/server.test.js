@@ -1,28 +1,18 @@
-// import { ObjectId } from '../../../../Library/Caches/typescript/2.6/node_modules/@types/bson';
 
 const expect = require('expect');
 const request = require('supertest');
 const {ObjectID} = require('mongodb');
+const toBeType = require('jest-tobetype');
+expect.extend(toBeType);
 
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {User} = require('./../models/user');
+const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
 
-const todos = [{
-    _id: new ObjectID(),
-    text: 'First test todo'
-}, {
-    _id: new ObjectID(),
-    text: 'Second text todo',
-    completed: true,
-    completedAt : 345
-}];
-
-beforeEach((done) => {
-    Todo.remove({}).then(() => {
-       return Todo.insertMany(todos);
-    }).then(() => done());
-});
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POST /todos', () => {
     it('should create a new todo', (done) => {
@@ -93,7 +83,6 @@ describe('POST /todos', () => {
 
         it('should return 404 if todo not found', (done) => {
             var hexId = new ObjectID().toHexString();
-            console.log(hexId);
             request(app)
                 .get(`/todos/${hexId}`)
                 .expect(404)
@@ -126,7 +115,7 @@ describe('POST /todos', () => {
                   }
 
                   Todo.findById(hexId).then((todo) => {
-                      console.log(todo);
+                    //   console.log(todo);
                     //expect(null).toNotExist();
                 
                     done();
@@ -166,9 +155,82 @@ describe('POST /todos', () => {
             .expect((res) => {
                 expect(res.body.todo.text).toBe(text);
                 expect(res.body.todo.completed).toBe(true);
-                expect(res.body.todo.completedAt).toBeA('number');
+                expect(res.body.todo.completedAt).toBeType('number');
             })
             .end(done);
         });
 
+    });
+
+    describe('GET /user/me', () => {
+      it('Should return user if authenticated', (done) => {
+          request(app)
+          .get('/users/me')
+          .set('x-auth', users[0].tokens[0].token)
+          .expect(200)
+          .expect((res) => {
+              expect(res.body._id).toBe(users[0]._id.toHexString());
+              expect(res.body.email).toBe(users[0].email);
+          })
+          .end(done);
+      });
+      it('Should return 401 if not authenticated', (done) => {
+        request(app)
+        .get('/users/me')
+        .expect(401)
+        .expect((res) => {
+            expect(res.body).toEqual({});
+        })
+        .end(done);
+      });
+    });
+
+
+    describe('POST /users', () => {
+        it('Should create a user', (done) => {
+            var email ='olami@gmail.com';
+            var password = '123avr63663';
+            
+            request(app)
+            .post('/users')
+            .send({email, password})
+            .expect(200)
+            .expect((res) => {
+                expect(res.headers['x-auth']).toBeTruthy();
+                expect(res.body._id).toBeTruthy();
+                expect(res.body.email).toBe(email)
+            })
+            .end((err) => {
+                if (err) {
+                    return done();
+                }
+                // console.log(User)
+                User.findOne({email}).then((user) => {
+                    // console.log(user);
+                    expect(user).toBeTruthy();
+                    expect(user.password).not.toBe(password);
+                    done();
+                });
+            });
+        });
+        it('Should return validation error if request invalid', (done) => {
+            request(app)
+            .post('/users')
+            .send({
+                email: 'juwo@',
+                password: '234'
+            })
+            .expect(400)
+            .end(done);
+        });
+        it('Should not create user if email in use', (done) => {
+            request(app)
+            .post('/users')
+            .send({
+                email: users[0].email,
+                password: 'police123'
+            })
+            .expect(400)
+            .end(done);
+        });
     })
