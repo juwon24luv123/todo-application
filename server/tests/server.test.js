@@ -102,7 +102,6 @@ describe('POST /todos', () => {
         it('Should remove a todo', (done) => {
             var hexId = todos[1]._id.toHexString();
             
-
             request(app)
               .delete(`/todos/${hexId}`)
               .expect(200)
@@ -210,9 +209,10 @@ describe('POST /todos', () => {
                     expect(user).toBeTruthy();
                     expect(user.password).not.toBe(password);
                     done();
-                });
+                }).catch((e) => done(e));
             });
         });
+
         it('Should return validation error if request invalid', (done) => {
             request(app)
             .post('/users')
@@ -223,6 +223,7 @@ describe('POST /todos', () => {
             .expect(400)
             .end(done);
         });
+
         it('Should not create user if email in use', (done) => {
             request(app)
             .post('/users')
@@ -233,4 +234,79 @@ describe('POST /todos', () => {
             .expect(400)
             .end(done);
         });
-    })
+    });
+
+
+    describe('POST /users/login', () => {
+        it('Should login user and return auth token', (done) => {
+            request(app)
+            .post('/users/login')
+            .send({
+                email: users[1].email,
+                password: users[1].password
+            })
+            .expect(200)
+            .expect((res) => {
+                expect(res.headers['x-auth']).toBeTruthy();
+            })
+            .end((err, res) => {
+                if(err) {
+                    return done(err);
+                }
+
+                User.findById(users[1]._id).then((user) => {
+                    // console.log(user)
+                    expect(user.tokens[0]).toBeTruthy();
+                    // ({
+                    //     // _id: user.tokens[0]._id,
+                    //     access: 'auth',
+                    //     token: res.headers['x-auth']
+                    // });
+                    done();
+                }).catch((e) => done(e));
+            });
+        });
+        
+        it('Should reject invalid login', (done) => {
+            request(app)
+            .post('/users/login')
+            .send({
+                email: users[1].email,
+                password: users[1].password + '1' 
+            })
+            .expect(400)
+            .expect((res) => {
+                expect(res.headers['x-auth']).not.toBeTruthy();
+            })
+            .end((err, res) => {
+                if(err) {
+                    return done(err);
+                }
+
+                User.findById(users[1]._id).then((user) => {
+                    expect(user.tokens.length).toBe(0);
+                    done();
+                }).catch((e) => done(e));
+            });
+        });
+    });
+
+
+    describe('DELETE /users/me/token', () => {
+        it('Should remove autho token from logout', (done) => {
+            request(app)
+              .delete('/users/me/token')
+              .set('x-auth', users[0].tokens[0].token)
+              .expect(200)
+              .end((err, res) => {
+                  if (err) {
+                      return done(err);
+                  }
+
+                  User.findById(users[0]._id).then((user) => {
+                    expect(user.tokens.length).toBe(0);
+                    done();
+                  }).catch((e) => done(e))
+              });
+        });
+    });
